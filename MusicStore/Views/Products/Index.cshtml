@@ -1,0 +1,87 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "מוצרים";
+    var categories = ViewBag.Categories as List<Category>;
+    var selectedCategory = ViewBag.SelectedCategory as Category;
+    var searchTerm = ViewBag.SearchTerm as string;
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>
+            @if (selectedCategory != null)
+            {
+                @selectedCategory.CategoryName
+            }
+            else
+            {
+                <text>כל ה<span class="gold-text">מוצרים</span></text>
+            }
+        </h1>
+        <p>@Model.Count מוצרים זמינים</p>
+
+        <form method="get" action="/Products">
+            <div class="filters-bar">
+                <a href="/Products" class="filter-chip @(selectedCategory == null ? "active" : "")">הכל</a>
+                @if (categories != null)
+                {
+                    foreach (var cat in categories)
+                    {
+                        <a href="/Products?categoryId=@cat.CategoryID"
+                           class="filter-chip @(selectedCategory?.CategoryID == cat.CategoryID ? "active" : "")">
+                            @cat.Icon @cat.CategoryName
+                        </a>
+                    }
+                }
+                <div class="search-box">
+                    <input type="text" name="search" placeholder="חפש מוצר, מותג..." value="@searchTerm" />
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section style="padding-top: 30px;">
+    <div class="container">
+        @if (Model.Any())
+        {
+            <div class="products-grid">
+                @foreach (var p in Model)
+                {
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@p.Image" alt="@p.ProductName" loading="lazy" />
+                            @if (p.Stock < 5)
+                            {
+                                <span class="product-badge">אחרונים</span>
+                            }
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand">@p.Brand</div>
+                            <div class="product-name">@p.ProductName</div>
+                            <div class="product-price">
+                                <span class="currency">₪</span>@p.Price.ToString("N0")
+                            </div>
+                            <div class="product-actions">
+                                <a href="/Products/Details/@p.ProductID" class="btn-view">פרטים</a>
+                                <form method="post" action="/Cart/Add" style="display:inline;">
+                                    <input type="hidden" name="productId" value="@p.ProductID" />
+                                    <button type="submit" class="btn-add-cart">+ עגלה</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🔍</div>
+                <h2>לא נמצאו מוצרים</h2>
+                <p>נסה חיפוש אחר או בחר קטגוריה אחרת</p>
+                <a href="/Products" class="btn-primary">ראה את כל המוצרים</a>
+            </div>
+        }
+    </div>
+</section>

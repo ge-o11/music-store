@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>צור קשר - MusicStore</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>צור <span class="gold-text">קשר</span></h1>
+                <p>נשמח לעמוד לרשותך בכל שאלה</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1000px; margin: 0 auto;">
+                    <div class="auth-card" style="margin: 0;">
+                        <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 24px;">שלח לנו הודעה</h2>
+                        <form onsubmit="sendMsg(event)">
+                            <div class="form-group"><label>שם מלא</label><input type="text" placeholder="הזן את שמך המלא" required /></div>
+                            <div class="form-group"><label>אימייל</label><input type="email" placeholder="your@email.com" required /></div>
+                            <div class="form-group"><label>הודעה</label><textarea placeholder="במה נוכל לעזור?" required></textarea></div>
+                            <button type="submit" class="btn-submit">שלח הודעה</button>
+                        </form>
+                    </div>
+
+                    <div style="padding: 20px;">
+                        <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 32px;">פרטי החנות</h2>
+                        <div style="margin-bottom: 28px;"><div style="color: var(--gold); font-weight: 700; margin-bottom: 6px;">📍 כתובת</div><p style="color: var(--text-secondary);">דיזנגוף 100, תל אביב</p></div>
+                        <div style="margin-bottom: 28px;"><div style="color: var(--gold); font-weight: 700; margin-bottom: 6px;">📞 טלפון</div><p style="color: var(--text-secondary);">03-1234567</p></div>
+                        <div style="margin-bottom: 28px;"><div style="color: var(--gold); font-weight: 700; margin-bottom: 6px;">✉️ אימייל</div><p style="color: var(--text-secondary);">info@musicstore.co.il</p></div>
+                        <div style="margin-bottom: 28px;"><div style="color: var(--gold); font-weight: 700; margin-bottom: 6px;">🕐 שעות פתיחה</div><p style="color: var(--text-secondary);">א'-ה': 09:00 - 21:00<br>ו': 09:00 - 14:00<br>שבת: סגור</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        function sendMsg(e) { e.preventDefault(); showAlert('תודה! פנייתך התקבלה בהצלחה'); e.target.reset(); }
+    </script>
+</body>
+</html>

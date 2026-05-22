@@ -1,0 +1,115 @@
+@model Product
+@{
+    ViewData["Title"] = Model.ProductName;
+    var category = ViewBag.Category as Category;
+    var related = ViewBag.Related as List<Product>;
+}
+
+<section class="product-details">
+    <div class="container">
+        <div class="product-details-grid">
+            <div class="product-details-image">
+                <img src="@Model.Image" alt="@Model.ProductName" />
+            </div>
+            <div class="product-details-info">
+                <div class="breadcrumb">
+                    <a href="/">בית</a> / <a href="/Products">מוצרים</a>
+                    @if (category != null)
+                    {
+                        <text> / <a href="/Products?categoryId=@category.CategoryID">@category.CategoryName</a></text>
+                    }
+                </div>
+
+                <div class="brand">@Model.Brand</div>
+                <h1>@Model.ProductName</h1>
+
+                @if (Model.Stock > 0)
+                {
+                    <div class="stock-badge @(Model.Stock < 5 ? "low" : "")">
+                        @if (Model.Stock < 5)
+                        {
+                            <text>● נותרו רק @Model.Stock במלאי</text>
+                        }
+                        else
+                        {
+                            <text>● במלאי – זמין למשלוח מיידי</text>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="stock-badge low">● אזל מהמלאי</div>
+                }
+
+                <div class="price">₪@Model.Price.ToString("N0")</div>
+
+                <p class="description">@Model.Description</p>
+
+                <form method="post" action="/Cart/Add">
+                    <input type="hidden" name="productId" value="@Model.ProductID" />
+                    <div class="quantity-selector">
+                        <label>כמות:</label>
+                        <div class="quantity-input">
+                            <button type="button" onclick="changeQty(-1)">−</button>
+                            <input type="number" name="quantity" id="qtyInput" value="1" min="1" max="@Model.Stock" />
+                            <button type="button" onclick="changeQty(1)">+</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-buy" @(Model.Stock == 0 ? "disabled" : "")>
+                        🛒 הוסף לעגלה
+                    </button>
+                </form>
+
+                <div style="display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong style="color:var(--gold);">🚚 משלוח חינם</strong><br>
+                        בקנייה מעל 500₪
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong style="color:var(--gold);">🛡️ אחריות</strong><br>
+                        שנה מלאה
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (related != null && related.Any())
+{
+    <section style="background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header">
+                <h2>מוצרים <span class="gold-text">דומים</span></h2>
+            </div>
+            <div class="products-grid">
+                @foreach (var p in related)
+                {
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@p.Image" alt="@p.ProductName" loading="lazy" />
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand">@p.Brand</div>
+                            <div class="product-name">@p.ProductName</div>
+                            <div class="product-price">
+                                <span class="currency">₪</span>@p.Price.ToString("N0")
+                            </div>
+                            <div class="product-actions">
+                                <a href="/Products/Details/@p.ProductID" class="btn-view">פרטים</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<script>
+    function changeQty(delta) {
+        const input = document.getElementById('qtyInput');
+        const newVal = parseInt(input.value) + delta;
+        if (newVal >= 1 && newVal <= parseInt(input.max)) input.value = newVal;
+    }
+</script>

@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "הרשמה";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="logo">
+            <span class="logo-icon">🎵</span>
+            <span class="logo-text">Music<span class="logo-accent">Store</span></span>
+        </div>
+        <h1>צור חשבון</h1>
+        <p class="subtitle">הצטרף לקהילת המוזיקאים שלנו</p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="form-error">@ViewBag.Error</div>
+        }
+
+        <form method="post" action="/Account/Register">
+            <div class="form-group">
+                <label>שם מלא</label>
+                <input type="text" name="name" placeholder="ישראל ישראלי" required />
+            </div>
+            <div class="form-group">
+                <label>אימייל</label>
+                <input type="email" name="email" placeholder="your@email.com" required />
+            </div>
+            <div class="form-group">
+                <label>סיסמה</label>
+                <input type="password" name="password" placeholder="לפחות 6 תווים" required />
+            </div>
+            <div class="form-group">
+                <label>אימות סיסמה</label>
+                <input type="password" name="confirmPassword" placeholder="הזן שוב את הסיסמה" required />
+            </div>
+            <button type="submit" class="btn-submit">הרשם</button>
+        </form>
+
+        <div class="auth-switch">
+            כבר יש לך חשבון? <a href="/Account/Login">התחבר כאן</a>
+        </div>
+    </div>
+</div>

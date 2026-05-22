@@ -1,0 +1,60 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "ההזמנות שלי";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>ההזמנות <span class="gold-text">שלי</span></h1>
+        <p>@Model.Count הזמנות עד כה</p>
+    </div>
+</section>
+
+<section style="padding: 40px 0;">
+    <div class="container">
+        @if (Model.Any())
+        {
+            @foreach (var order in Model)
+            {
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; padding-bottom:16px; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 13px;">הזמנה</div>
+                            <div style="font-weight:800; font-size:18px;" class="gold-text">#@order.OrderID</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 13px;">תאריך</div>
+                            <div>@order.OrderDate.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 13px;">סטטוס</div>
+                            <div class="gold-text" style="font-weight:700;">@order.Status</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 13px;">סה"כ</div>
+                            <div style="font-size:22px; font-weight:900;" class="gold-text">₪@order.TotalPrice.ToString("N0")</div>
+                        </div>
+                    </div>
+                    <div>
+                        @foreach (var item in order.Items)
+                        {
+                            <div style="display:flex; justify-content:space-between; padding: 6px 0; color: var(--text-secondary);">
+                                <span>@item.ProductName × @item.Quantity</span>
+                                <span>₪@((item.Price * item.Quantity).ToString("N0"))</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-cart">
+                <div class="empty-cart-icon">📦</div>
+                <h2>אין הזמנות עדיין</h2>
+                <p>בוא נמצא משהו מיוחד בשבילך</p>
+                <a href="/Products" class="btn-primary">לחנות</a>
+            </div>
+        }
+    </div>
+</section>

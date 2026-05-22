@@ -1,0 +1,69 @@
+@model Product
+@{
+    ViewData["Title"] = "ערוך מוצר";
+    var categories = ViewBag.Categories as List<Category>;
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>ערוך <span class="gold-text">מוצר</span></h1>
+        <p>@Model.ProductName</p>
+    </div>
+</section>
+
+<section style="padding: 40px 0;">
+    <div class="container" style="max-width: 700px;">
+        <form method="post" action="/Admin/EditProduct" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px;">
+            <input type="hidden" name="ProductID" value="@Model.ProductID" />
+
+            <div class="form-group">
+                <label>שם המוצר</label>
+                <input type="text" name="ProductName" value="@Model.ProductName" required />
+            </div>
+
+            <div class="form-group">
+                <label>מותג</label>
+                <input type="text" name="Brand" value="@Model.Brand" required />
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>מחיר (₪)</label>
+                    <input type="number" name="Price" step="0.01" min="0" value="@Model.Price" required />
+                </div>
+                <div class="form-group">
+                    <label>מלאי</label>
+                    <input type="number" name="Stock" min="0" value="@Model.Stock" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>קטגוריה</label>
+                <select name="CategoryID" required>
+                    @if (categories != null)
+                    {
+                        foreach (var c in categories)
+                        {
+                            <option value="@c.CategoryID" selected="@(c.CategoryID == Model.CategoryID)">@c.Icon @c.CategoryName</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>קישור לתמונה</label>
+                <input type="url" name="Image" value="@Model.Image" />
+            </div>
+
+            <div class="form-group">
+                <label>תיאור</label>
+                <textarea name="Description" rows="5" required>@Model.Description</textarea>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+                <button type="submit" class="btn-submit">שמור שינויים</button>
+                <a href="/Admin" class="btn-secondary" style="display:inline-flex; align-items:center;">ביטול</a>
+            </div>
+        </form>
+    </div>
+</section>

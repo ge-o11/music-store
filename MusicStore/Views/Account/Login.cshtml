@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "התחברות";
+    Layout = "_Layout";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="logo">
+            <span class="logo-icon">🎵</span>
+            <span class="logo-text">Music<span class="logo-accent">Store</span></span>
+        </div>
+        <h1>ברוך שובך</h1>
+        <p class="subtitle">התחבר לחשבונך כדי להמשיך</p>
+
+        <div class="demo-credentials">
+            <strong>👤 משתמש לדוגמה:</strong> user@demo.com / demo123<br />
+            <strong>👑 מנהל:</strong> admin@musicstore.com / admin123
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="form-error">@ViewBag.Error</div>
+        }
+
+        <form method="post" action="/Account/Login">
+            <div class="form-group">
+                <label>אימייל</label>
+                <input type="email" name="email" placeholder="your@email.com" required />
+            </div>
+            <div class="form-group">
+                <label>סיסמה</label>
+                <input type="password" name="password" placeholder="הזן סיסמה" required />
+            </div>
+            <button type="submit" class="btn-submit">התחבר</button>
+        </form>
+
+        <div class="auth-switch">
+            עוד אין לך חשבון? <a href="/Account/Register">הרשם כאן</a>
+        </div>
+    </div>
+</div>

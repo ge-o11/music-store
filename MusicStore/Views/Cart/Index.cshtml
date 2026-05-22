@@ -1,0 +1,102 @@
+@model List<CartItem>
+@{
+    ViewData["Title"] = "עגלת קניות";
+    var total = (decimal)(ViewBag.Total ?? 0m);
+    var shipping = total > 500 || total == 0 ? 0 : 35;
+    var finalTotal = total + shipping;
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>עגלת <span class="gold-text">קניות</span></h1>
+        <p>@Model.Count פריטים בעגלה</p>
+    </div>
+</section>
+
+<section class="cart-page">
+    <div class="container">
+        @if (Model.Any())
+        {
+            <div class="cart-grid">
+                <div class="cart-items">
+                    @foreach (var item in Model)
+                    {
+                        <div class="cart-item">
+                            <div class="cart-item-image">
+                                <img src="@item.Image" alt="@item.ProductName" />
+                            </div>
+                            <div class="cart-item-info">
+                                <h3>@item.ProductName</h3>
+                                <div class="price-each">₪@item.Price.ToString("N0") ליחידה</div>
+                                <form method="post" action="/Cart/Update" style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+                                    <input type="hidden" name="productId" value="@item.ProductID" />
+                                    <div class="quantity-input" style="height:36px;">
+                                        <button type="submit" name="quantity" value="@(item.Quantity - 1)" style="height:36px;width:32px;">−</button>
+                                        <input type="number" name="quantity" value="@item.Quantity" min="1" style="height:36px;width:50px;" onchange="this.form.submit()" />
+                                        <button type="submit" name="quantity" value="@(item.Quantity + 1)" style="height:36px;width:32px;">+</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="cart-item-subtotal">
+                                ₪@item.Subtotal.ToString("N0")
+                            </div>
+                            <form method="post" action="/Cart/Remove">
+                                <input type="hidden" name="productId" value="@item.ProductID" />
+                                <button type="submit" class="btn-remove" title="הסר">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+
+                <div class="cart-summary">
+                    <h2>סיכום הזמנה</h2>
+                    <div class="summary-row">
+                        <span>סה"כ פריטים</span>
+                        <span>@Model.Sum(x => x.Quantity)</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>סכום ביניים</span>
+                        <span>₪@total.ToString("N0")</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>משלוח</span>
+                        <span>@(shipping == 0 ? "חינם 🎉" : $"₪{shipping}")</span>
+                    </div>
+                    @if (shipping > 0)
+                    {
+                        <div style="font-size:13px; color: var(--text-muted); padding: 4px 0;">
+                            הוסף ₪@((500 - total).ToString("N0")) למשלוח חינם
+                        </div>
+                    }
+                    <div class="summary-row total">
+                        <span>סה"כ לתשלום</span>
+                        <span class="amount">₪@finalTotal.ToString("N0")</span>
+                    </div>
+
+                    <form method="post" action="/Cart/Checkout" style="margin-top: 20px;">
+                        <button type="submit" class="btn-buy">
+                            🔒 לתשלום מאובטח
+                        </button>
+                    </form>
+
+                    <a href="/Products" style="display:block; text-align:center; margin-top: 16px; color: var(--gold); font-size: 14px;">
+                        ← המשך לקנות
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
+                <h2>העגלה ריקה</h2>
+                <p>נראה שעוד לא הוספת כלום לעגלה</p>
+                <a href="/Products" class="btn-primary">התחל לקנות</a>
+            </div>
+        }
+    </div>
+</section>

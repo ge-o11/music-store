@@ -1,0 +1,161 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "לוח ניהול";
+    var users = ViewBag.Users as List<User>;
+    var recentOrders = ViewBag.RecentOrders as List<Order>;
+}
+
+<section class="admin-page">
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1>לוח <span class="gold-text">ניהול</span></h1>
+                <p style="color: var(--text-secondary);">סקירה כללית של החנות</p>
+            </div>
+            <a href="/Admin/AddProduct" class="btn-primary">+ הוסף מוצר חדש</a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">סה"כ מוצרים</div>
+                <div class="stat-value">@ViewBag.TotalProducts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">משתמשים רשומים</div>
+                <div class="stat-value">@ViewBag.TotalUsers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">הזמנות</div>
+                <div class="stat-value">@ViewBag.TotalOrders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">הכנסות (₪)</div>
+                <div class="stat-value">@(((decimal)ViewBag.TotalRevenue).ToString("N0"))</div>
+            </div>
+        </div>
+
+        <div class="admin-tabs">
+            <a href="#products" class="active" onclick="showTab('products', this)">מוצרים</a>
+            <a href="#orders" onclick="showTab('orders', this)">הזמנות אחרונות</a>
+            <a href="#users" onclick="showTab('users', this)">משתמשים</a>
+            <a href="/Admin/Orders">כל ההזמנות →</a>
+        </div>
+
+        <div id="tab-products">
+            <h2 class="section-title">ניהול מוצרים</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>תמונה</th>
+                        <th>שם מוצר</th>
+                        <th>מותג</th>
+                        <th>מחיר</th>
+                        <th>מלאי</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><img src="@p.Image" class="product-thumb" alt="@p.ProductName" /></td>
+                            <td><strong>@p.ProductName</strong></td>
+                            <td>@p.Brand</td>
+                            <td class="gold-text" style="font-weight:700;">₪@p.Price.ToString("N0")</td>
+                            <td>@p.Stock</td>
+                            <td>
+                                <a href="/Admin/EditProduct/@p.ProductID" class="btn-edit">ערוך</a>
+                                <form method="post" action="/Admin/DeleteProduct" style="display:inline;" onsubmit="return confirm('האם למחוק את המוצר?');">
+                                    <input type="hidden" name="id" value="@p.ProductID" />
+                                    <button type="submit" class="btn-delete">מחק</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="tab-orders" style="display:none;">
+            <h2 class="section-title">הזמנות אחרונות</h2>
+            @if (recentOrders != null && recentOrders.Any())
+            {
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>תאריך</th>
+                            <th>פריטים</th>
+                            <th>סכום</th>
+                            <th>סטטוס</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in recentOrders)
+                        {
+                            <tr>
+                                <td><strong>#@o.OrderID</strong></td>
+                                <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@o.Items.Sum(i => i.Quantity)</td>
+                                <td class="gold-text" style="font-weight:700;">₪@o.TotalPrice.ToString("N0")</td>
+                                <td>@o.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="text-align:center; padding: 40px; color: var(--text-muted);">אין הזמנות עדיין</p>
+            }
+        </div>
+
+        <div id="tab-users" style="display:none;">
+            <h2 class="section-title">משתמשים רשומים</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>שם</th>
+                        <th>אימייל</th>
+                        <th>תפקיד</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (users != null)
+                    {
+                        foreach (var u in users)
+                        {
+                            <tr>
+                                <td>@u.UserID</td>
+                                <td><strong>@u.Name</strong></td>
+                                <td>@u.Email</td>
+                                <td>
+                                    @if (u.IsAdmin)
+                                    {
+                                        <span style="color: var(--gold); font-weight: 700;">👑 מנהל</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: var(--text-secondary);">לקוח</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script>
+    function showTab(tab, link) {
+        ['products', 'orders', 'users'].forEach(t => {
+            document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+        });
+        document.querySelectorAll('.admin-tabs a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        event.preventDefault();
+    }
+</script>

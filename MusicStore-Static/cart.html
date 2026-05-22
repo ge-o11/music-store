@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>עגלת קניות - MusicStore</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>עגלת <span class="gold-text">קניות</span></h1>
+                <p id="cart-count">0 פריטים בעגלה</p>
+            </div>
+        </section>
+        <section class="cart-page">
+            <div class="container">
+                <div id="cart-content"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', renderCart);
+
+        function renderCart() {
+            const items = Cart.getItems();
+            document.getElementById('cart-count').textContent = `${items.length} פריטים בעגלה`;
+
+            if (!items.length) {
+                document.getElementById('cart-content').innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h2>העגלה ריקה</h2>
+                        <p>נראה שעוד לא הוספת כלום לעגלה</p>
+                        <a href="products.html" class="btn-primary">התחל לקנות</a>
+                    </div>`;
+                return;
+            }
+
+            const total = Cart.total();
+            const shipping = total > 500 ? 0 : 35;
+            const finalTotal = total + shipping;
+
+            document.getElementById('cart-content').innerHTML = `
+                <div class="cart-grid">
+                    <div class="cart-items">
+                        ${items.map(i => `
+                            <div class="cart-item">
+                                <div class="cart-item-image"><img src="${i.Image}" alt="${i.ProductName}" /></div>
+                                <div class="cart-item-info">
+                                    <h3>${i.ProductName}</h3>
+                                    <div class="price-each">₪${formatPrice(i.Price)} ליחידה</div>
+                                    <div class="quantity-input" style="height:36px; margin-top:10px;">
+                                        <button onclick="updateQty(${i.ProductID}, ${i.Quantity - 1})" style="height:36px;width:32px;">−</button>
+                                        <input type="number" value="${i.Quantity}" min="1" style="height:36px;width:50px;" onchange="updateQty(${i.ProductID}, this.value)" />
+                                        <button onclick="updateQty(${i.ProductID}, ${i.Quantity + 1})" style="height:36px;width:32px;">+</button>
+                                    </div>
+                                </div>
+                                <div class="cart-item-subtotal">₪${formatPrice(i.Price * i.Quantity)}</div>
+                                <button class="btn-remove" onclick="removeItem(${i.ProductID})" title="הסר">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="cart-summary">
+                        <h2>סיכום הזמנה</h2>
+                        <div class="summary-row"><span>סה"כ פריטים</span><span>${Cart.count()}</span></div>
+                        <div class="summary-row"><span>סכום ביניים</span><span>₪${formatPrice(total)}</span></div>
+                        <div class="summary-row"><span>משלוח</span><span>${shipping === 0 ? 'חינם 🎉' : '₪' + shipping}</span></div>
+                        ${shipping > 0 ? `<div style="font-size:13px; color: var(--text-muted); padding: 4px 0;">הוסף ₪${formatPrice(500 - total)} למשלוח חינם</div>` : ''}
+                        <div class="summary-row total"><span>סה"כ לתשלום</span><span class="amount">₪${formatPrice(finalTotal)}</span></div>
+                        <button class="btn-buy" style="margin-top: 20px;" onclick="checkout()">🔒 לתשלום מאובטח</button>
+                        <a href="products.html" style="display:block; text-align:center; margin-top: 16px; color: var(--gold); font-size: 14px;">← המשך לקנות</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQty(id, qty) { Cart.update(id, Number(qty)); renderCart(); renderHeader(); }
+        function removeItem(id) { Cart.remove(id); renderCart(); renderHeader(); }
+
+        function checkout() {
+            const user = Auth.getCurrentUser();
+            if (!user) {
+                alert('יש להתחבר לפני ביצוע הזמנה');
+                location.href = 'login.html';
+                return;
+            }
+            const items = Cart.getItems();
+            if (!items.length) return;
+            const orders = DB.getOrders();
+            const order = {
+                OrderID: Math.max(0, ...orders.map(o => o.OrderID)) + 1,
+                UserID: user.UserID,
+                TotalPrice: Cart.total() + (Cart.total() > 500 ? 0 : 35),
+                OrderDate: new Date().toISOString(),
+                Status: 'Confirmed',
+                Items: items
+            };
+            orders.push(order);
+            DB.saveOrders(orders);
+            Cart.clear();
+            location.href = `order-confirmation.html?id=${order.OrderID}`;
+        }
+    </script>
+</body>
+</html>

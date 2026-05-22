@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מוצרים - MusicStore</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1 id="page-title">כל ה<span class="gold-text">מוצרים</span></h1>
+                <p id="page-count">0 מוצרים זמינים</p>
+                <div id="filters" class="filters-bar"></div>
+            </div>
+        </section>
+
+        <section style="padding-top: 30px;">
+            <div class="container">
+                <div id="products-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const categoryId = getQueryParam('categoryId');
+            const search = getQueryParam('search') || '';
+            renderFilters(categoryId, search);
+            applyFilters(categoryId, search);
+        });
+
+        function renderFilters(activeCategoryId, searchTerm) {
+            const cats = DB.getCategories();
+            document.getElementById('filters').innerHTML = `
+                <a href="products.html" class="filter-chip ${!activeCategoryId ? 'active' : ''}">הכל</a>
+                ${cats.map(c => `<a href="products.html?categoryId=${c.CategoryID}" class="filter-chip ${String(c.CategoryID) === activeCategoryId ? 'active' : ''}">${c.Icon} ${c.CategoryName}</a>`).join('')}
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="חפש מוצר, מותג..." value="${searchTerm}" oninput="onSearchInput(event)" />
+                </div>
+            `;
+        }
+
+        function onSearchInput(e) {
+            if (e.key === 'Enter' || e.type === 'input') {
+                const v = document.getElementById('searchInput').value;
+                applyFilters(getQueryParam('categoryId'), v);
+            }
+        }
+
+        function applyFilters(categoryId, search) {
+            let products = DB.getProducts();
+            const cat = categoryId ? DB.getCategoryById(categoryId) : null;
+            if (categoryId) products = products.filter(p => p.CategoryID === Number(categoryId));
+            if (search) {
+                const s = search.toLowerCase();
+                products = products.filter(p => p.ProductName.toLowerCase().includes(s) || p.Description.toLowerCase().includes(s) || p.Brand.toLowerCase().includes(s));
+            }
+
+            document.getElementById('page-title').innerHTML = cat ? cat.CategoryName : 'כל ה<span class="gold-text">מוצרים</span>';
+            document.getElementById('page-count').textContent = `${products.length} מוצרים זמינים`;
+
+            const list = document.getElementById('products-list');
+            if (products.length) {
+                list.innerHTML = `<div class="products-grid">${products.map(renderProductCard).join('')}</div>`;
+            } else {
+                list.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🔍</div>
+                        <h2>לא נמצאו מוצרים</h2>
+                        <p>נסה חיפוש אחר או בחר קטגוריה אחרת</p>
+                        <a href="products.html" class="btn-primary">ראה את כל המוצרים</a>
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

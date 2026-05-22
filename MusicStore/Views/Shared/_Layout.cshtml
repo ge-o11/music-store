@@ -1,0 +1,115 @@
+@{
+    var userName = Context.Session.GetString("UserName");
+    var isAdmin = Context.Session.GetString("IsAdmin") == "True";
+}
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Music Store</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container nav-container">
+            <a class="logo" href="/">
+                <span class="logo-icon">🎵</span>
+                <span class="logo-text">Music<span class="logo-accent">Store</span></span>
+            </a>
+            <nav class="main-nav">
+                <a href="/">בית</a>
+                <a href="/Products">מוצרים</a>
+                <a href="/Home/About">אודות</a>
+                <a href="/Home/Contact">צור קשר</a>
+                @if (isAdmin)
+                {
+                    <a href="/Admin" class="admin-link">לוח ניהול</a>
+                }
+            </nav>
+            <div class="nav-actions">
+                <a href="/Cart" class="cart-btn" title="עגלה">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </a>
+                @if (userName != null)
+                {
+                    <div class="user-menu">
+                        <span class="user-name">שלום, @userName</span>
+                        <div class="user-dropdown">
+                            <a href="/Account/MyOrders">ההזמנות שלי</a>
+                            <a href="/Account/Logout">התנתק</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="btn-login">התחבר</a>
+                    <a href="/Account/Register" class="btn-register">הרשמה</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">@TempData["Error"]</div>
+    }
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h3>Music<span class="logo-accent">Store</span></h3>
+                <p>חנות כלי הנגינה המובילה. איכות, מגוון ושירות מקצועי מאז 1995.</p>
+            </div>
+            <div class="footer-col">
+                <h4>קטגוריות</h4>
+                <a href="/Products?categoryId=1">גיטרות</a>
+                <a href="/Products?categoryId=2">תופים</a>
+                <a href="/Products?categoryId=3">פסנתרים</a>
+                <a href="/Products?categoryId=4">כלי נשיפה</a>
+            </div>
+            <div class="footer-col">
+                <h4>שירות לקוחות</h4>
+                <a href="/Home/Contact">צור קשר</a>
+                <a href="/Home/About">אודות</a>
+                <a href="#">מדיניות החזרות</a>
+                <a href="#">משלוחים</a>
+            </div>
+            <div class="footer-col">
+                <h4>צור קשר</h4>
+                <p>📞 03-1234567</p>
+                <p>✉️ info@musicstore.co.il</p>
+                <p>📍 דיזנגוף 100, תל אביב</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 MusicStore. כל הזכויות שמורות.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(a => {
+                a.style.opacity = '0';
+                setTimeout(() => a.remove(), 300);
+            });
+        }, 4000);
+    </script>
+</body>
+</html>

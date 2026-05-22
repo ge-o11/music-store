@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>לוח ניהול - MusicStore</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <section class="admin-page">
+            <div class="container" id="admin-content"></div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!Auth.isAdmin()) { alert('אין לך הרשאת מנהל'); location.href = 'login.html'; return; }
+            renderAdmin();
+        });
+
+        function renderAdmin() {
+            const products = DB.getProducts();
+            const users = DB.getUsers();
+            const orders = DB.getOrders();
+            const revenue = orders.reduce((s, o) => s + o.TotalPrice, 0);
+
+            document.getElementById('admin-content').innerHTML = `
+                <div class="admin-header">
+                    <div><h1>לוח <span class="gold-text">ניהול</span></h1><p style="color: var(--text-secondary);">סקירה כללית של החנות</p></div>
+                    <button class="btn-primary" onclick="showAddProduct()">+ הוסף מוצר חדש</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-label">סה"כ מוצרים</div><div class="stat-value">${products.length}</div></div>
+                    <div class="stat-card"><div class="stat-label">משתמשים רשומים</div><div class="stat-value">${users.length}</div></div>
+                    <div class="stat-card"><div class="stat-label">הזמנות</div><div class="stat-value">${orders.length}</div></div>
+                    <div class="stat-card"><div class="stat-label">הכנסות (₪)</div><div class="stat-value">${formatPrice(revenue)}</div></div>
+                </div>
+
+                <div class="admin-tabs">
+                    <a href="#" class="active" onclick="showTab('products', this); return false;">מוצרים</a>
+                    <a href="#" onclick="showTab('orders', this); return false;">הזמנות</a>
+                    <a href="#" onclick="showTab('users', this); return false;">משתמשים</a>
+                </div>
+
+                <div id="tab-products">
+                    <h2 class="section-title">ניהול מוצרים</h2>
+                    <table class="admin-table">
+                        <thead><tr><th>תמונה</th><th>שם מוצר</th><th>מותג</th><th>מחיר</th><th>מלאי</th><th>פעולות</th></tr></thead>
+                        <tbody>
+                            ${products.map(p => `
+                                <tr>
+                                    <td><img src="${p.Image}" class="product-thumb" alt="${p.ProductName}" /></td>
+                                    <td><strong>${p.ProductName}</strong></td>
+                                    <td>${p.Brand}</td>
+                                    <td class="gold-text" style="font-weight:700;">₪${formatPrice(p.Price)}</td>
+                                    <td>${p.Stock}</td>
+                                    <td>
+                                        <button class="btn-edit" onclick="showEditProduct(${p.ProductID})">ערוך</button>
+                                        <button class="btn-delete" onclick="deleteProduct(${p.ProductID})">מחק</button>
+                                    </td>
+                                </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-orders" style="display:none;">
+                    <h2 class="section-title">הזמנות</h2>
+                    ${orders.length ? `
+                        <table class="admin-table">
+                            <thead><tr><th>#</th><th>תאריך</th><th>פריטים</th><th>סכום</th><th>סטטוס</th></tr></thead>
+                            <tbody>
+                                ${orders.map(o => `
+                                    <tr>
+                                        <td><strong>#${o.OrderID}</strong></td>
+                                        <td>${new Date(o.OrderDate).toLocaleString('he-IL')}</td>
+                                        <td>${o.Items.reduce((s, i) => s + i.Quantity, 0)}</td>
+                                        <td class="gold-text" style="font-weight:700;">₪${formatPrice(o.TotalPrice)}</td>
+                                        <td>${o.Status}</td>
+                                    </tr>`).join('')}
+                            </tbody>
+                        </table>` : '<p style="text-align:center; padding: 40px; color: var(--text-muted);">אין הזמנות עדיין</p>'}
+                </div>
+
+                <div id="tab-users" style="display:none;">
+                    <h2 class="section-title">משתמשים רשומים</h2>
+                    <table class="admin-table">
+                        <thead><tr><th>#</th><th>שם</th><th>אימייל</th><th>תפקיד</th></tr></thead>
+                        <tbody>
+                            ${users.map(u => `
+                                <tr>
+                                    <td>${u.UserID}</td>
+                                    <td><strong>${u.Name}</strong></td>
+                                    <td>${u.Email}</td>
+                                    <td>${u.IsAdmin ? '<span style="color: var(--gold); font-weight: 700;">👑 מנהל</span>' : '<span style="color: var(--text-secondary);">לקוח</span>'}</td>
+                                </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+                    <div id="modal-content" style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto;"></div>
+                </div>
+            `;
+        }
+
+        function showTab(tab, link) {
+            ['products', 'orders', 'users'].forEach(t => document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none');
+            document.querySelectorAll('.admin-tabs a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+        }
+
+        function showAddProduct() {
+            const cats = DB.getCategories();
+            document.getElementById('modal-content').innerHTML = `
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 24px;">הוסף מוצר חדש</h2>
+                <form onsubmit="saveProduct(event, null)">
+                    <div class="form-group"><label>שם המוצר</label><input type="text" id="ProductName" required /></div>
+                    <div class="form-group"><label>מותג</label><input type="text" id="Brand" required /></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group"><label>מחיר (₪)</label><input type="number" id="Price" step="0.01" min="0" required /></div>
+                        <div class="form-group"><label>מלאי</label><input type="number" id="Stock" min="0" value="10" required /></div>
+                    </div>
+                    <div class="form-group"><label>קטגוריה</label><select id="CategoryID" required>${cats.map(c => `<option value="${c.CategoryID}">${c.Icon} ${c.CategoryName}</option>`).join('')}</select></div>
+                    <div class="form-group"><label>קישור לתמונה</label><input type="url" id="Image" placeholder="https://..." /></div>
+                    <div class="form-group"><label>תיאור</label><textarea id="Description" rows="4" required></textarea></div>
+                    <div style="display:flex; gap:12px;">
+                        <button type="submit" class="btn-submit">הוסף מוצר</button>
+                        <button type="button" class="btn-secondary" onclick="closeModal()">ביטול</button>
+                    </div>
+                </form>
+            `;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function showEditProduct(id) {
+            const p = DB.getProductById(id);
+            const cats = DB.getCategories();
+            document.getElementById('modal-content').innerHTML = `
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 24px;">ערוך מוצר</h2>
+                <form onsubmit="saveProduct(event, ${id})">
+                    <div class="form-group"><label>שם המוצר</label><input type="text" id="ProductName" value="${p.ProductName}" required /></div>
+                    <div class="form-group"><label>מותג</label><input type="text" id="Brand" value="${p.Brand}" required /></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group"><label>מחיר (₪)</label><input type="number" id="Price" step="0.01" min="0" value="${p.Price}" required /></div>
+                        <div class="form-group"><label>מלאי</label><input type="number" id="Stock" min="0" value="${p.Stock}" required /></div>
+                    </div>
+                    <div class="form-group"><label>קטגוריה</label><select id="CategoryID" required>${cats.map(c => `<option value="${c.CategoryID}" ${c.CategoryID === p.CategoryID ? 'selected' : ''}>${c.Icon} ${c.CategoryName}</option>`).join('')}</select></div>
+                    <div class="form-group"><label>קישור לתמונה</label><input type="url" id="Image" value="${p.Image}" /></div>
+                    <div class="form-group"><label>תיאור</label><textarea id="Description" rows="4" required>${p.Description}</textarea></div>
+                    <div style="display:flex; gap:12px;">
+                        <button type="submit" class="btn-submit">שמור שינויים</button>
+                        <button type="button" class="btn-secondary" onclick="closeModal()">ביטול</button>
+                    </div>
+                </form>
+            `;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function saveProduct(e, id) {
+            e.preventDefault();
+            const products = DB.getProducts();
+            const data = {
+                ProductName: document.getElementById('ProductName').value,
+                Brand: document.getElementById('Brand').value,
+                Price: Number(document.getElementById('Price').value),
+                Stock: Number(document.getElementById('Stock').value),
+                CategoryID: Number(document.getElementById('CategoryID').value),
+                Image: document.getElementById('Image').value || 'https://via.placeholder.com/600x400?text=No+Image',
+                Description: document.getElementById('Description').value
+            };
+            if (id) {
+                const idx = products.findIndex(p => p.ProductID === id);
+                if (idx >= 0) products[idx] = { ...products[idx], ...data };
+            } else {
+                data.ProductID = Math.max(0, ...products.map(p => p.ProductID)) + 1;
+                products.push(data);
+            }
+            DB.saveProducts(products);
+            closeModal();
+            renderAdmin();
+            showAlert(id ? 'המוצר עודכן בהצלחה' : 'המוצר נוסף בהצלחה');
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('האם למחוק את המוצר?')) return;
+            DB.saveProducts(DB.getProducts().filter(p => p.ProductID !== id));
+            renderAdmin();
+            showAlert('המוצר נמחק בהצלחה');
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+@model Order
+@{
+    ViewData["Title"] = "אישור הזמנה";
+}
+
+<section class="confirmation-page">
+    <div class="container">
+        <div class="confirmation-icon">✓</div>
+        <h1>תודה על הקנייה!</h1>
+        <p>ההזמנה שלך התקבלה בהצלחה ותטופל בקרוב</p>
+
+        <div class="order-summary">
+            <div style="display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px;">
+                <strong>מספר הזמנה</strong>
+                <span class="gold-text" style="font-weight: 800; font-size: 18px;">#@Model.OrderID</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: var(--text-secondary);">תאריך</span>
+                <span>@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: var(--text-secondary);">סטטוס</span>
+                <span class="gold-text">@Model.Status</span>
+            </div>
+
+            <div style="margin: 20px 0; padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                @foreach (var item in Model.Items)
+                {
+                    <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+                        <span>@item.ProductName × @item.Quantity</span>
+                        <span class="gold-text">₪@((item.Price * item.Quantity).ToString("N0"))</span>
+                    </div>
+                }
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 800;">
+                <span>סה"כ שולם</span>
+                <span class="gold-text">₪@Model.TotalPrice.ToString("N0")</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <a href="/Products" class="btn-primary">המשך לקנות</a>
+            <a href="/Account/MyOrders" class="btn-secondary">ההזמנות שלי</a>
+        </div>
+    </div>
+</section>

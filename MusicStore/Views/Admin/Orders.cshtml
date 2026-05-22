@@ -1,0 +1,59 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "כל ההזמנות";
+    var users = ViewBag.Users as Dictionary<int, string>;
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>כל ה<span class="gold-text">הזמנות</span></h1>
+        <p>@Model.Count הזמנות במערכת</p>
+    </div>
+</section>
+
+<section style="padding: 40px 0;">
+    <div class="container">
+        @if (Model.Any())
+        {
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>לקוח</th>
+                        <th>תאריך</th>
+                        <th>פריטים</th>
+                        <th>סכום</th>
+                        <th>סטטוס</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        <tr>
+                            <td><strong>#@o.OrderID</strong></td>
+                            <td>@(users != null && users.ContainsKey(o.UserID) ? users[o.UserID] : "—")</td>
+                            <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@o.Items.Sum(i => i.Quantity) פריטים</td>
+                            <td class="gold-text" style="font-weight:700;">₪@o.TotalPrice.ToString("N0")</td>
+                            <td>
+                                <span style="background: rgba(212, 175, 55, 0.15); color: var(--gold); padding: 4px 10px; border-radius: 6px; font-size: 13px;">@o.Status</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-cart">
+                <div class="empty-cart-icon">📋</div>
+                <h2>אין הזמנות עדיין</h2>
+                <p>הזמנות יוצגו כאן ברגע שלקוחות יבצעו רכישה</p>
+            </div>
+        }
+
+        <div style="margin-top: 24px;">
+            <a href="/Admin" class="btn-secondary">← חזור ללוח הניהול</a>
+        </div>
+    </div>
+</section>
