@@ -1,19 +1,21 @@
 # 🎵 MusicStore — חנות כלי נגינה אונליין
 
-פרויקט אתר מסחר אלקטרוני (E-Commerce) לחנות כלי נגינה. הריפו מכיל **שתי גרסאות** של אותו הפרויקט.
+פרויקט אתר מסחר אלקטרוני (E-Commerce) לחנות כלי נגינה.
+
+🌐 **דמו חי:** https://music-store.pages.dev
 
 ---
 
-## 📦 שתי גרסאות
+## 📦 הריפו מכיל שתי גרסאות
 
-### 1. `MusicStore/` — גרסת C# מלאה (ASP.NET Core MVC)
-הגרסה לפי דרישות המרצה: C# Backend + SQL Server schema (In-Memory) + HTML Views.
+### 1. גרסה סטטית (HTML/CSS/JS) — בשורש הריפו
+מתאימה לפריסה ב-**Cloudflare Pages / Netlify / GitHub Pages**.
+הנתונים נשמרים ב-`localStorage` של הדפדפן.
 
-**טכנולוגיות:**
-- Backend: **C# / ASP.NET Core 8.0 MVC**
-- Frontend: **HTML5 + CSS3** (Razor Views)
-- Database: **In-Memory** (מסד נתונים בתוך הקוד, לפי מבנה SQL Server מה-PDF)
-- Session: ASP.NET Core Session
+**הרצה מקומית:** פתח את `index.html` בדפדפן.
+
+### 2. גרסת C# (ASP.NET Core MVC) — תיקיית `MusicStore/`
+הגרסה המקצועית לפי דרישות המרצה: C# Backend + מבנה SQL Server (In-Memory) + Razor Views.
 
 **הרצה מקומית:**
 ```bash
@@ -22,19 +24,6 @@ dotnet restore
 dotnet run
 ```
 פתח: <http://localhost:5000>
-
----
-
-### 2. `MusicStore-Static/` — גרסת HTML/JS סטטית
-המרה של הפרויקט ל-HTML+CSS+JS, מתאים לפריסה ל-**Cloudflare Pages / Netlify / GitHub Pages**.
-
-הנתונים נשמרים ב-`localStorage` של הדפדפן (במקום SQL).
-
-**הרצה מקומית:**
-פשוט פתח את `index.html` בדפדפן.
-
-**פריסה ל-Cloudflare Pages:**
-דרגגראגה של התיקייה לתוך dash.cloudflare.com → Workers & Pages → Upload assets.
 
 ---
 
